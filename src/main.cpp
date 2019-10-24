@@ -1,20 +1,15 @@
 #include "main.h"
 
-/**
- * A callback function for LLEMU's center button.
- *
- * When this callback is fired, it will toggle line 2 of the LCD text between
- * "I was pressed!" and nothing.
- */
-void on_center_button() {
-	static bool pressed = false;
-	pressed = !pressed;
-	if (pressed) {
-		pros::lcd::set_text(2, "I was pressed!");
-	} else {
-		pros::lcd::clear_line(2);
-	}
-}
+// Motor ports
+#define LEVER_MOTOR_PORT 1
+#define LEFT_BACK_MOTOR_PORT 3
+#define RIGHT_BACK_MOTOR_PORT 4
+#define LEFT_MID_MOTOR_PORT 7
+#define RIGHT_MID_MOTOR_PORT 10
+#define LEFT_FRONT_MOTOR_PORT 6
+#define RIGHT_FRONT_MOTOR_PORT 9
+#define INTAKE_MOTOR_PORT 20
+
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -23,10 +18,10 @@ void on_center_button() {
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
+	// Initialize LCD
+	// TODO: Fix this so that it actually works
 	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
-
-	pros::lcd::register_btn1_cb(on_center_button);
+	pros::lcd::set_text(2, "1011X_Alpha v0.2 - Kinda PushBot");
 }
 
 /**
@@ -58,7 +53,64 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+	// Initialize motors
+	// Note: all motors on right side + lever motor + intake motor are reversed.
+	pros::Motor lever (LEVER_MOTOR_PORT, MOTOR_GEARSET_36, true);
+	pros::Motor left_back_wheel (LEFT_BACK_MOTOR_PORT);
+	pros::Motor right_back_wheel (RIGHT_BACK_MOTOR_PORT, true);
+	pros::Motor left_mid_wheel (LEFT_MID_MOTOR_PORT);
+	pros::Motor right_mid_wheel (RIGHT_MID_MOTOR_PORT, true);
+	pros::Motor left_front_wheel (LEFT_FRONT_MOTOR_PORT);
+	pros::Motor right_front_wheel (RIGHT_FRONT_MOTOR_PORT, true);
+	pros::Motor intake (INTAKE_MOTOR_PORT, true);
+
+	// Set brake modes
+	lever.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	left_back_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
+	right_back_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
+	left_mid_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
+	right_mid_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
+	left_front_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
+	right_front_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
+
+	// 1 point autonomous
+	left_front_wheel.move_velocity(100);	// Move forwards
+	left_mid_wheel.move_velocity(100);
+	left_back_wheel.move_velocity(100);
+	right_front_wheel.move_velocity(101);
+	right_mid_wheel.move_velocity(101);
+	right_back_wheel.move_velocity(101);
+	pros::delay(3000); 										// Move for ~3 seconds
+	left_front_wheel.move_velocity(0);		// Stop
+	left_mid_wheel.move_velocity(0);
+	left_back_wheel.move_velocity(0);
+	right_front_wheel.move_velocity(0);
+	right_mid_wheel.move_velocity(0);
+	right_back_wheel.move_velocity(0);
+
+	// Move back
+	left_front_wheel.move_velocity(-100);
+	left_mid_wheel.move_velocity(-100);
+	left_back_wheel.move_velocity(-100);
+	right_front_wheel.move_velocity(-100);
+	right_mid_wheel.move_velocity(-100);
+	right_back_wheel.move_velocity(-100);
+	pros::delay(2000);										// Move for ~2 seconds
+	left_front_wheel.move_velocity(0);		// Stop
+	left_mid_wheel.move_velocity(0);
+	left_back_wheel.move_velocity(0);
+	right_front_wheel.move_velocity(0);
+	right_mid_wheel.move_velocity(0);
+	right_back_wheel.move_velocity(0);
+
+	// Activate tray
+	lever.move_velocity(100);
+	pros::delay(1000);
+	lever.move_velocity(0);
+	lever.move_velocity(-50);
+	pros::delay(1000);
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -74,19 +126,96 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	// Initialize motors
+	// Note: all motors on right side + lever motor + intake motor are reversed.
+	pros::Motor lever (LEVER_MOTOR_PORT, MOTOR_GEARSET_36, true);
+	pros::Motor left_back_wheel (LEFT_BACK_MOTOR_PORT);
+	pros::Motor right_back_wheel (RIGHT_BACK_MOTOR_PORT, true);
+	pros::Motor left_mid_wheel (LEFT_MID_MOTOR_PORT);
+	pros::Motor right_mid_wheel (RIGHT_MID_MOTOR_PORT, true);
+	pros::Motor left_front_wheel (LEFT_FRONT_MOTOR_PORT);
+	pros::Motor right_front_wheel (RIGHT_FRONT_MOTOR_PORT, true);
+	pros::Motor intake (INTAKE_MOTOR_PORT, true);
+
+	// Set brake modes
+	lever.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	left_back_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
+	right_back_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
+	left_mid_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
+	right_mid_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
+	left_front_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
+	right_front_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
+
+	// Initialize controller
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::Motor left_mtr(1);
-	pros::Motor right_mtr(2);
 
+	// Drivetrain mode
+	int DRIVETRAIN_MODE = 0;		// 0 = fast, default; 1 = slow
+
+	// Main loop
 	while (true) {
-		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
-		int left = master.get_analog(ANALOG_LEFT_Y);
-		int right = master.get_analog(ANALOG_RIGHT_Y);
+		// Get joystick input
+		int LEFT_Y = master.get_analog(ANALOG_LEFT_Y);
+		int RIGHT_Y = master.get_analog(ANALOG_RIGHT_Y);
 
-		left_mtr = left;
-		right_mtr = right;
-		pros::delay(20);
+		// Switch drivetrain mode
+		if (master.get_digital(DIGITAL_Y)) {
+			if (DRIVETRAIN_MODE == 0) {
+				DRIVETRAIN_MODE = 1;
+			}
+			else if (DRIVETRAIN_MODE == 1) {
+				DRIVETRAIN_MODE = 0;
+			}
+			pros::delay(50);
+		}
+
+		// Run motors based on joystick input (tank drive)
+		// Slow/fast drivetrain mode is also implemented here
+		if (DRIVETRAIN_MODE == 0) {
+			left_front_wheel.move(LEFT_Y);
+			left_mid_wheel.move(LEFT_Y);
+			left_back_wheel.move(LEFT_Y);
+
+			right_front_wheel.move(RIGHT_Y);
+			right_mid_wheel.move(RIGHT_Y);
+			right_back_wheel.move(RIGHT_Y);
+		}
+		else if (DRIVETRAIN_MODE == 1) {
+			left_front_wheel.move(LEFT_Y / 5);
+			left_mid_wheel.move(LEFT_Y / 5);
+			left_back_wheel.move(LEFT_Y / 5);
+			right_front_wheel.move(RIGHT_Y / 5);
+			right_mid_wheel.move(RIGHT_Y / 5);
+			right_back_wheel.move(RIGHT_Y / 5);
+		}
+
+		// Read buttons and run lever
+		if (master.get_digital(DIGITAL_L1)) {
+			lever.move_velocity(40);
+		}
+		else if (master.get_digital(DIGITAL_L2)) {
+			lever.move_velocity(-40);
+		}
+		else {
+			lever.move_velocity(0);
+		}
+
+		// Read buttons and run intake
+		if (master.get_digital(DIGITAL_R1)) {
+			intake.move_velocity(200);
+		}
+		else if (master.get_digital(DIGITAL_R2)) {
+			intake.move_velocity(-200);
+		}
+		else {
+			intake.move_velocity(0);
+		}
+
+		// For autonomous testing
+		if (master.get_digital(DIGITAL_A)) {
+			autonomous();
+		}
+
+		pros::delay(2);		// Prevent infinite loop
 	}
 }
