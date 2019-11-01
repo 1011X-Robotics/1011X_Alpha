@@ -1,14 +1,12 @@
 #include "main.h"
 
-// Motor ports
-#define LEVER_MOTOR_PORT 1
-#define LEFT_BACK_MOTOR_PORT 3
-#define RIGHT_BACK_MOTOR_PORT 4
-#define LEFT_MID_MOTOR_PORT 7
-#define RIGHT_MID_MOTOR_PORT 10
-#define LEFT_FRONT_MOTOR_PORT 6
-#define RIGHT_FRONT_MOTOR_PORT 9
-#define INTAKE_MOTOR_PORT 20
+#define LEVER_MOTOR_PORT 10					// Lever motor
+#define LEFT_BACK_MOTOR_PORT 6			// Drivetrain motors
+#define RIGHT_BACK_MOTOR_PORT 5
+#define LEFT_FRONT_MOTOR_PORT 16
+#define RIGHT_FRONT_MOTOR_PORT 15
+#define LEFT_INTAKE_MOTOR_PORT 18		// Intake motors
+#define RIGHT_INTAKE_MOTOR_PORT 13
 
 
 /**
@@ -59,49 +57,38 @@ void autonomous() {
 	pros::Motor lever (LEVER_MOTOR_PORT, MOTOR_GEARSET_36, true);
 	pros::Motor left_back_wheel (LEFT_BACK_MOTOR_PORT);
 	pros::Motor right_back_wheel (RIGHT_BACK_MOTOR_PORT, true);
-	pros::Motor left_mid_wheel (LEFT_MID_MOTOR_PORT);
-	pros::Motor right_mid_wheel (RIGHT_MID_MOTOR_PORT, true);
 	pros::Motor left_front_wheel (LEFT_FRONT_MOTOR_PORT);
 	pros::Motor right_front_wheel (RIGHT_FRONT_MOTOR_PORT, true);
-	pros::Motor intake (INTAKE_MOTOR_PORT, true);
+	pros::Motor left_intake (LEFT_INTAKE_MOTOR_PORT, true);
+	pros::Motor right_intake (RIGHT_INTAKE_MOTOR_PORT, true);
 
 	// Set brake modes
 	lever.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	left_back_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
 	right_back_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
-	left_mid_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
-	right_mid_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
 	left_front_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
 	right_front_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
 
 	// 1 point autonomous
 	left_front_wheel.move_velocity(100);	// Move forwards
-	left_mid_wheel.move_velocity(100);
 	left_back_wheel.move_velocity(100);
 	right_front_wheel.move_velocity(101);
-	right_mid_wheel.move_velocity(101);
 	right_back_wheel.move_velocity(101);
 	pros::delay(3000); 										// Move for ~3 seconds
 	left_front_wheel.move_velocity(0);		// Stop
-	left_mid_wheel.move_velocity(0);
 	left_back_wheel.move_velocity(0);
 	right_front_wheel.move_velocity(0);
-	right_mid_wheel.move_velocity(0);
 	right_back_wheel.move_velocity(0);
 
 	// Move back
 	left_front_wheel.move_velocity(-100);
-	left_mid_wheel.move_velocity(-100);
 	left_back_wheel.move_velocity(-100);
 	right_front_wheel.move_velocity(-100);
-	right_mid_wheel.move_velocity(-100);
 	right_back_wheel.move_velocity(-100);
 	pros::delay(2000);										// Move for ~2 seconds
 	left_front_wheel.move_velocity(0);		// Stop
-	left_mid_wheel.move_velocity(0);
 	left_back_wheel.move_velocity(0);
 	right_front_wheel.move_velocity(0);
-	right_mid_wheel.move_velocity(0);
 	right_back_wheel.move_velocity(0);
 
 	// Activate tray
@@ -131,18 +118,15 @@ void opcontrol() {
 	pros::Motor lever (LEVER_MOTOR_PORT, MOTOR_GEARSET_36, true);
 	pros::Motor left_back_wheel (LEFT_BACK_MOTOR_PORT);
 	pros::Motor right_back_wheel (RIGHT_BACK_MOTOR_PORT, true);
-	pros::Motor left_mid_wheel (LEFT_MID_MOTOR_PORT);
-	pros::Motor right_mid_wheel (RIGHT_MID_MOTOR_PORT, true);
 	pros::Motor left_front_wheel (LEFT_FRONT_MOTOR_PORT);
 	pros::Motor right_front_wheel (RIGHT_FRONT_MOTOR_PORT, true);
-	pros::Motor intake (INTAKE_MOTOR_PORT, true);
+	pros::Motor left_intake (LEFT_INTAKE_MOTOR_PORT, true);
+	pros::Motor right_intake (RIGHT_INTAKE_MOTOR_PORT, true);
 
 	// Set brake modes
 	lever.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	left_back_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
 	right_back_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
-	left_mid_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
-	right_mid_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
 	left_front_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
 	right_front_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
 
@@ -173,19 +157,16 @@ void opcontrol() {
 		// Slow/fast drivetrain mode is also implemented here
 		if (DRIVETRAIN_MODE == 0) {
 			left_front_wheel.move(LEFT_Y);
-			left_mid_wheel.move(LEFT_Y);
 			left_back_wheel.move(LEFT_Y);
 
 			right_front_wheel.move(RIGHT_Y);
-			right_mid_wheel.move(RIGHT_Y);
 			right_back_wheel.move(RIGHT_Y);
 		}
 		else if (DRIVETRAIN_MODE == 1) {
 			left_front_wheel.move(LEFT_Y / 5);
-			left_mid_wheel.move(LEFT_Y / 5);
 			left_back_wheel.move(LEFT_Y / 5);
+
 			right_front_wheel.move(RIGHT_Y / 5);
-			right_mid_wheel.move(RIGHT_Y / 5);
 			right_back_wheel.move(RIGHT_Y / 5);
 		}
 
@@ -202,13 +183,16 @@ void opcontrol() {
 
 		// Read buttons and run intake
 		if (master.get_digital(DIGITAL_R1)) {
-			intake.move_velocity(200);
+			left_intake.move_velocity(200);
+			right_intake.move_velocity(200);
 		}
 		else if (master.get_digital(DIGITAL_R2)) {
-			intake.move_velocity(-200);
+			left_intake.move_velocity(200);
+			right_intake.move_velocity(-200);
 		}
 		else {
-			intake.move_velocity(0);
+			left_intake.move_velocity(0);
+			right_intake.move_velocity(0);
 		}
 
 		// For autonomous testing
