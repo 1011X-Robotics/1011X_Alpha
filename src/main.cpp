@@ -143,14 +143,13 @@ void opcontrol() {
 		int RIGHT_Y = master.get_analog(ANALOG_RIGHT_Y);
 
 		// Switch drivetrain mode
-		if (master.get_digital(DIGITAL_Y)) {
+		if (master.get_digital_new_press(DIGITAL_Y)) {
 			if (DRIVETRAIN_MODE == 0) {
 				DRIVETRAIN_MODE = 1;
 			}
 			else if (DRIVETRAIN_MODE == 1) {
 				DRIVETRAIN_MODE = 0;
 			}
-			pros::delay(50);
 		}
 
 		// Run motors based on joystick input (tank drive)
@@ -196,7 +195,7 @@ void opcontrol() {
 		}
 
 		// For autonomous testing
-		if (master.get_digital(DIGITAL_A)) {
+		if (master.get_digital_new_press(DIGITAL_A)) {
 			autonomous();
 		}
 
