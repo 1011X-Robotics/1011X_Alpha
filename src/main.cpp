@@ -19,7 +19,8 @@ void initialize() {
 	// Initialize LCD
 	// TODO: Fix this so that it actually works
 	pros::lcd::initialize();
-	pros::lcd::set_text(2, "1011X_Alpha v0.2 - Kinda PushBot");
+	pros::lcd::set_text(1, "1011X_Alpha v0.3");
+	pros::lcd::set_text(2, "PushBot + Tower bot");
 }
 
 /**
