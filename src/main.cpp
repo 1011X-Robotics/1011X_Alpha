@@ -121,8 +121,8 @@ void opcontrol() {
 	pros::Motor right_back_wheel (RIGHT_BACK_MOTOR_PORT, true);
 	pros::Motor left_front_wheel (LEFT_FRONT_MOTOR_PORT);
 	pros::Motor right_front_wheel (RIGHT_FRONT_MOTOR_PORT, true);
-	pros::Motor left_intake (LEFT_INTAKE_MOTOR_PORT, true);
-	pros::Motor right_intake (RIGHT_INTAKE_MOTOR_PORT);
+	pros::Motor left_intake (LEFT_INTAKE_MOTOR_PORT);
+	pros::Motor right_intake (RIGHT_INTAKE_MOTOR_PORT, true);
 
 	// Set brake modes
 	lever.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
