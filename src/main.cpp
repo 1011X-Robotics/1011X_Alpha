@@ -132,9 +132,13 @@ void opcontrol() {
 
 	// Initialize controller
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
+	master.clear();		// Clear controller screen
 
 	// Drivetrain mode
 	int DRIVETRAIN_MODE = 0;		// 0 = fast, default; 1 = slow
+
+	// Counter for controller LCD update
+	int count = 0;
 
 	// Main loop
 	while (true) {
@@ -168,6 +172,10 @@ void opcontrol() {
 			right_front_wheel.move(RIGHT_Y / 5);
 			right_back_wheel.move(RIGHT_Y / 5);
 		}
+		// Report disconnect errors
+		if (errno == ENODEV) {
+			master.print(1, 0, "ENODEV Drivetrain");
+		}
 
 		// Read buttons and run lever
 		if (master.get_digital(DIGITAL_L1)) {
@@ -178,6 +186,10 @@ void opcontrol() {
 		}
 		else {
 			lever.move_velocity(0);
+		}
+		// Report disconnect errors
+		if (errno == ENODEV) {
+			master.print(1, 0, "ENODEV Lever");
 		}
 
 		// Read buttons and run intake
@@ -193,12 +205,32 @@ void opcontrol() {
 			left_intake.move_velocity(0);
 			right_intake.move_velocity(0);
 		}
+		// Report disconnect errors
+		if (errno == ENODEV) {
+			master.print(1, 0, "ENODEV Intake");
+		}
 
 		// For autonomous testing
 		if (master.get_digital_new_press(DIGITAL_A)) {
 			autonomous();
 		}
 
+		// Clear screen + report battery level & drivetrain mode
+		if (!(count % 25)) {
+			master.clear_line(0);		// Clear status lines, but not error lines
+			master.clear_line(2);
+
+			if (DRIVETRAIN_MODE == 0) {
+				master.print(0, 0, "DT Mode: Fast");
+			}
+			else if (DRIVETRAIN_MODE == 1) {
+				master.print(0, 0, "DT Mode: Slow");
+			}
+			master.print(2, 0, "BAT: %f", pros::battery::get_capacity());
+		}
+
+
+		count++;					// Increment counter for controller LCD
 		pros::delay(2);		// Prevent infinite loop
 	}
 }
