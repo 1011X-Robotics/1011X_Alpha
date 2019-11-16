@@ -137,6 +137,7 @@ void opcontrol() {
 
 	// Drivetrain mode
 	int DRIVETRAIN_MODE = 0;		// 0 = fast, default; 1 = slow
+	int CONTROL_MODE = 0;				// 0 = tank; 1 = arcade
 
 	// Counter for controller LCD update
 	int count = 0;
@@ -157,21 +158,57 @@ void opcontrol() {
 			}
 		}
 
-		// Run motors based on joystick input (tank drive)
-		// Slow/fast drivetrain mode is also implemented here
-		if (DRIVETRAIN_MODE == 0) {
-			left_front_wheel.move(LEFT_Y);
-			left_back_wheel.move(LEFT_Y);
-
-			right_front_wheel.move(RIGHT_Y);
-			right_back_wheel.move(RIGHT_Y);
+		// Switch drivetrain mode
+		if (master.get_digital_new_press(DIGITAL_B)) {
+			if (CONTROL_MODE == 0) {
+				CONTROL_MODE = 1;
+			}
+			else if (CONTROL_MODE == 1) {
+				CONTROL_MODE = 0;
+			}
 		}
-		else if (DRIVETRAIN_MODE == 1) {
-			left_front_wheel.move(LEFT_Y / 5);
-			left_back_wheel.move(LEFT_Y / 5);
 
-			right_front_wheel.move(RIGHT_Y / 5);
-			right_back_wheel.move(RIGHT_Y / 5);
+
+		if (CONTROL_MODE == 0) {
+			// Run motors based on joystick input (tank drive)
+			// Slow/fast drivetrain mode is also implemented here
+			if (DRIVETRAIN_MODE == 0) {
+				left_front_wheel.move(LEFT_Y);
+				left_back_wheel.move(LEFT_Y);
+
+				right_front_wheel.move(RIGHT_Y);
+				right_back_wheel.move(RIGHT_Y);
+			}
+			else if (DRIVETRAIN_MODE == 1) {
+				left_front_wheel.move(LEFT_Y / 4);
+				left_back_wheel.move(LEFT_Y / 4);
+
+				right_front_wheel.move(RIGHT_Y / 4);
+				right_back_wheel.move(RIGHT_Y / 4);
+			}
+		}
+		else if (CONTROL_MODE == 1) {
+			// Run motors based on joystick input (arcade drive)
+			// Slow/fast drivetrain mode is also implemented here
+			int power = master.get_analog(ANALOG_LEFT_Y);
+			int turn = master.get_analog(ANALOG_RIGHT_X);
+			int left = power + turn;
+			int right = power - turn;
+
+			if (DRIVETRAIN_MODE == 0) {
+				left_front_wheel.move(left);
+				left_back_wheel.move(left);
+
+				right_front_wheel.move(right);
+				right_back_wheel.move(right);
+			}
+			else if (DRIVETRAIN_MODE == 1) {
+				left_front_wheel.move(left / 4);
+				left_back_wheel.move(left / 4);
+
+				right_front_wheel.move(right / 4);
+				right_back_wheel.move(right / 4);
+			}
 		}
 		// Report disconnect errors
 		if (errno == ENODEV) {
