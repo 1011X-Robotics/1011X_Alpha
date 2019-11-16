@@ -121,7 +121,7 @@ void opcontrol() {
 	pros::Motor left_front_wheel (LEFT_FRONT_MOTOR_PORT);
 	pros::Motor right_front_wheel (RIGHT_FRONT_MOTOR_PORT, true);
 	pros::Motor left_intake (LEFT_INTAKE_MOTOR_PORT, true);
-	pros::Motor right_intake (RIGHT_INTAKE_MOTOR_PORT, true);
+	pros::Motor right_intake (RIGHT_INTAKE_MOTOR_PORT);
 
 	// Set brake modes
 	lever.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
@@ -186,7 +186,7 @@ void opcontrol() {
 			right_intake.move_velocity(200);
 		}
 		else if (master.get_digital(DIGITAL_R2)) {
-			left_intake.move_velocity(200);
+			left_intake.move_velocity(-200);
 			right_intake.move_velocity(-200);
 		}
 		else {
