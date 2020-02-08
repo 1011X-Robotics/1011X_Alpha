@@ -125,7 +125,7 @@ void opcontrol() {
 	// Initialize LCD
 	// TODO: Fix this so that it actually works
 	pros::lcd::initialize();
-	pros::lcd::set_text(1, "1011X_Alpha v0.3");
+	pros::lcd::set_text(1, "1011X_Alpha v0.4");
 	pros::lcd::set_text(2, "6-stacker bot");
 
 	// Set brake modes
