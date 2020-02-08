@@ -51,8 +51,9 @@ void competition_initialize() {}
  */
 void autonomous() {
 	// Initialize motors
-	// Note: all motors on right side + lever motor + intake motor are reversed.
+	// Note: all motors on right side + lever motor + intake motor + arm are reversed.
 	pros::Motor lever (LEVER_MOTOR_PORT, MOTOR_GEARSET_36, true);
+	pros::Motor arm (ARM_MOTOR_PORT, MOTOR_GEARSET_36, true);
 	pros::Motor left_back_wheel (LEFT_BACK_MOTOR_PORT);
 	pros::Motor right_back_wheel (RIGHT_BACK_MOTOR_PORT, true);
 	pros::Motor left_front_wheel (LEFT_FRONT_MOTOR_PORT);
@@ -62,10 +63,13 @@ void autonomous() {
 
 	// Set brake modes
 	lever.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	arm.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	left_back_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
 	right_back_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
 	left_front_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
 	right_front_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
+	left_intake.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	right_intake.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 
 	// 1 point autonomous
 	left_front_wheel.move_velocity(100);	// Move forwards
@@ -89,12 +93,24 @@ void autonomous() {
 	right_front_wheel.move_velocity(0);
 	right_back_wheel.move_velocity(0);
 
-	// Activate tray
+	// Flip out intakes
+	left_intake.move_velocity(200);
+	pros::delay(800);
+	left_intake.move_velocity(0);
+	right_intake.move_velocity(200);
+	pros::delay(800);
+	right_intake.move_velocity(0);
+	pros::delay(250);
+
+	// Flip out tray
 	lever.move_velocity(100);
-	pros::delay(1500);
-	lever.move_velocity(0);
-	lever.move_velocity(-50);
 	pros::delay(1000);
+	lever.move_velocity(0);
+	left_intake.move_velocity(-200);
+	right_intake.move_velocity(-200);
+	pros::delay(400);
+	left_intake.move_velocity(0);
+	right_intake.move_velocity(0);
 }
 
 /**
@@ -262,11 +278,7 @@ void opcontrol() {
 
 		// For autonomous testing
 		if (master.get_digital_new_press(DIGITAL_A)) {
-			// autonomous();
-			arm.move_velocity(100);
-			pros::delay(800);
-			arm.move_velocity(0);
-
+			autonomous();
 		}
 
 		// Clear screen + report battery level & drivetrain mode
