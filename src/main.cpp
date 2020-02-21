@@ -283,6 +283,7 @@ void opcontrol() {
 		}
 
 		// For driver skills auto flip out
+		// ! Should mirror the flip-out part of autonomous code
 		if (master.get_digital_new_press(DIGITAL_A)) {
 			// Flip out intakes
 			left_intake.move_velocity(200);
@@ -317,7 +318,7 @@ void opcontrol() {
 			else if (DRIVETRAIN_MODE == 1) {
 				master.set_text(0, 0, "DT Mode: Slow");
 			}
-			// master.print(2, 0, "BAT: %f", pros::battery::get_capacity());
+			master.print(2, 0, "BAT: %f", pros::battery::get_capacity());
 		}
 
 		count++;					// Increment counter for controller LCD
