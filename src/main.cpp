@@ -1,4 +1,5 @@
 #include "main.h"
+#include "pros/misc.h"
 
 #define LEVER_MOTOR_PORT 10					// Lever motor
 #define ARM_MOTOR_PORT 1						// Arm motor
@@ -111,6 +112,11 @@ void autonomous() {
 	pros::delay(400);
 	left_intake.move_velocity(0);
 	right_intake.move_velocity(0);
+
+	// Pull tray back
+	lever.move_velocity(-100);
+	pros::delay(850);
+	lever.move_velocity(0);
 }
 
 /**
@@ -276,23 +282,42 @@ void opcontrol() {
 			right_intake.move_velocity(0);
 		}
 
-		// For autonomous testing
+		// For driver skills auto flip out
 		if (master.get_digital_new_press(DIGITAL_A)) {
-			autonomous();
+			// Flip out intakes
+			left_intake.move_velocity(200);
+			pros::delay(800);
+			left_intake.move_velocity(0);
+			right_intake.move_velocity(200);
+			pros::delay(800);
+			right_intake.move_velocity(0);
+			pros::delay(250);
+
+			// Flip out tray
+			lever.move_velocity(100);
+			pros::delay(1000);
+			lever.move_velocity(0);
+			left_intake.move_velocity(-200);
+			right_intake.move_velocity(-200);
+			pros::delay(400);
+			left_intake.move_velocity(0);
+			right_intake.move_velocity(0);
+
+			// Pull tray back
+			lever.move_velocity(-100);
+			pros::delay(850);
+			lever.move_velocity(0);
 		}
 
 		// Clear screen + report battery level & drivetrain mode
 		if (!(count % 25)) {
-			master.clear_line(0);		// Clear status lines, but not error lines
-			master.clear_line(2);
-
 			if (DRIVETRAIN_MODE == 0) {
-				master.print(0, 0, "DT Mode: Fast");
+				master.set_text(0, 0, "DT Mode: Fast");
 			}
 			else if (DRIVETRAIN_MODE == 1) {
-				master.print(0, 0, "DT Mode: Slow");
+				master.set_text(0, 0, "DT Mode: Slow");
 			}
-			master.print(2, 0, "BAT: %f", pros::battery::get_capacity());
+			// master.print(2, 0, "BAT: %f", pros::battery::get_capacity());
 		}
 
 		count++;					// Increment counter for controller LCD
