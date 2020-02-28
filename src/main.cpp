@@ -214,6 +214,17 @@ void opcontrol() {
 				right_front_wheel.move(RIGHT_Y / 4);
 				right_back_wheel.move(RIGHT_Y / 4);
 			}
+
+			// Read buttons and run arm
+			if (master.get_digital(DIGITAL_UP)) {
+				arm.move_velocity(100);
+			}
+			else if (master.get_digital(DIGITAL_DOWN)) {
+				arm.move_velocity(-100);
+			}
+			else {
+				arm.move_velocity(0);
+			}
 		}
 		else if (CONTROL_MODE == 1) {
 			// Run motors based on joystick input (arcade drive)
@@ -237,6 +248,10 @@ void opcontrol() {
 				right_front_wheel.move(right / 4);
 				right_back_wheel.move(right / 4);
 			}
+
+			// Use other joystick for arm control
+			int arm_speed = master.get_analog(ANALOG_RIGHT_Y);
+			arm.move(arm_speed);
 		}
 
 		// Read buttons and run lever
@@ -248,17 +263,6 @@ void opcontrol() {
 		}
 		else {
 			lever.move_velocity(0);
-		}
-
-		// Read buttons and run arm
-		if (master.get_digital(DIGITAL_UP)) {
-			arm.move_velocity(100);
-		}
-		else if (master.get_digital(DIGITAL_DOWN)) {
-			arm.move_velocity(-100);
-		}
-		else {
-			arm.move_velocity(0);
 		}
 
 		// Read buttons and run intake
