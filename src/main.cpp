@@ -2,12 +2,12 @@
 #include "pros/misc.h"
 
 #define LEVER_MOTOR_PORT 10					// Lever motor
-#define ARM_MOTOR_PORT 1						// Arm motor
+#define ARM_MOTOR_PORT 2						// Arm motor
 #define LEFT_BACK_MOTOR_PORT 6			// Drivetrain motors
 #define RIGHT_BACK_MOTOR_PORT 5
 #define LEFT_FRONT_MOTOR_PORT 16
 #define RIGHT_FRONT_MOTOR_PORT 15
-#define LEFT_INTAKE_MOTOR_PORT 18		// Intake motors
+#define LEFT_INTAKE_MOTOR_PORT 3		// Intake motors
 #define RIGHT_INTAKE_MOTOR_PORT 13
 
 
@@ -162,7 +162,6 @@ void opcontrol() {
 
 	// Initialize controller
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	master.clear();		// Clear controller screen
 
 	// Drivetrain mode
 	int DRIVETRAIN_MODE = 0;		// 0 = fast, default; 1 = slow
@@ -242,10 +241,10 @@ void opcontrol() {
 
 		// Read buttons and run lever
 		if (master.get_digital(DIGITAL_L1)) {
-			lever.move_velocity(30);
+			lever.move_velocity(100);
 		}
 		else if (master.get_digital(DIGITAL_L2)) {
-			lever.move_velocity(-30);
+			lever.move_velocity(-100);
 		}
 		else {
 			lever.move_velocity(0);
@@ -264,12 +263,12 @@ void opcontrol() {
 
 		// Read buttons and run intake
 		if (master.get_digital(DIGITAL_R1)) {
-			left_intake.move_velocity(160);
-			right_intake.move_velocity(160);
+			left_intake.move_velocity(200);
+			right_intake.move_velocity(200);
 		}
 		else if (master.get_digital(DIGITAL_R2)) {
-			left_intake.move_velocity(-160);
-			right_intake.move_velocity(-160);
+			left_intake.move_velocity(-200);
+			right_intake.move_velocity(-200);
 		}
 		else if (master.get_digital(DIGITAL_LEFT)) {
 			left_intake.move_velocity(200);
