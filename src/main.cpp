@@ -150,7 +150,7 @@ void opcontrol() {
 	// Initialize LCD
 	// TODO: Fix this so that it actually works
 	pros::lcd::initialize();
-	pros::lcd::set_text(1, "1011X_Alpha v0.4.1");
+	pros::lcd::set_text(1, "1011X_Alpha v0.5.0");
 	pros::lcd::set_text(2, "6-stacker bot");
 	master.set_text(1, 0, "[ DT: Fast ]");
 	pros::delay(50);
