@@ -8,7 +8,7 @@
 #define LEFT_FRONT_MOTOR_PORT 16
 #define RIGHT_FRONT_MOTOR_PORT 15
 #define LEFT_INTAKE_MOTOR_PORT 3		// Intake motors
-#define RIGHT_INTAKE_MOTOR_PORT 13
+#define RIGHT_INTAKE_MOTOR_PORT 12
 
 
 /**
@@ -133,6 +133,9 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	// Initialize controller
+	pros::Controller master(pros::E_CONTROLLER_MASTER);
+
 	// Initialize motors
 	// Note: all motors on right side + lever motor + intake motor + arm are reversed.
 	pros::Motor lever (LEVER_MOTOR_PORT, MOTOR_GEARSET_36, true);
@@ -149,6 +152,9 @@ void opcontrol() {
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "1011X_Alpha v0.4.1");
 	pros::lcd::set_text(2, "6-stacker bot");
+	master.set_text(1, 0, "[ DT: Fast ]");
+	pros::delay(50);
+	master.set_text(2, 0, "[  Mode: Tank  ]");
 
 	// Set brake modes
 	lever.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
@@ -159,9 +165,6 @@ void opcontrol() {
 	right_front_wheel.set_brake_mode (pros::E_MOTOR_BRAKE_BRAKE);
 	left_intake.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	right_intake.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-
-	// Initialize controller
-	pros::Controller master(pros::E_CONTROLLER_MASTER);
 
 	// Drivetrain mode
 	int DRIVETRAIN_MODE = 0;		// 0 = fast, default; 1 = slow
@@ -180,22 +183,33 @@ void opcontrol() {
 		if (master.get_digital_new_press(DIGITAL_Y)) {
 			if (DRIVETRAIN_MODE == 0) {
 				DRIVETRAIN_MODE = 1;
+				pros::delay(50);
+				master.set_text(1, 0, "[ DT: Slow ]");
 			}
 			else if (DRIVETRAIN_MODE == 1) {
 				DRIVETRAIN_MODE = 0;
+				pros::delay(50);
+				master.set_text(1, 0, "[ DT: Fast ]");
 			}
+			pros::delay(50);
+			master.rumble(". .");
 		}
 
 		// Switch drivetrain mode
 		if (master.get_digital_new_press(DIGITAL_B)) {
 			if (CONTROL_MODE == 0) {
 				CONTROL_MODE = 1;
+				pros::delay(50);
+				master.set_text(2, 0, "[ Mode: Arcade ]");
 			}
 			else if (CONTROL_MODE == 1) {
 				CONTROL_MODE = 0;
+				pros::delay(50);
+				master.set_text(2, 0, "[  Mode: Tank  ]");
 			}
+			pros::delay(50);
+			master.rumble(". .");
 		}
-
 
 		if (CONTROL_MODE == 0) {
 			// Run motors based on joystick input (tank drive)
@@ -256,10 +270,10 @@ void opcontrol() {
 
 		// Read buttons and run lever
 		if (master.get_digital(DIGITAL_L1)) {
-			lever.move_velocity(100);
+			lever.move_velocity(65);
 		}
 		else if (master.get_digital(DIGITAL_L2)) {
-			lever.move_velocity(-100);
+			lever.move_velocity(-65);
 		}
 		else {
 			lever.move_velocity(0);
@@ -313,15 +327,12 @@ void opcontrol() {
 			lever.move_velocity(0);
 		}
 
-		// Clear screen + report battery level & drivetrain mode
-		if (!(count % 25)) {
-			if (DRIVETRAIN_MODE == 0) {
-				master.set_text(0, 0, "DT Mode: Fast");
-			}
-			else if (DRIVETRAIN_MODE == 1) {
-				master.set_text(0, 0, "DT Mode: Slow");
-			}
-			master.print(2, 0, "BAT: %f", pros::battery::get_capacity());
+		// Report battery leveL
+		if ((count % 25) == 0) {
+			char buffer[100];
+			double batLevel = pros::battery::get_capacity();
+			snprintf(buffer, 100, "BAT: %2f", batLevel);
+			master.set_text(0, 0, buffer);
 		}
 
 		count++;					// Increment counter for controller LCD
